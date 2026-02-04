@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repo
+      # 1️⃣ Checkout repository
       - name: Checkout firmware repository
         uses: actions/checkout@v4
 
@@ -24,13 +24,16 @@ jobs:
       # 3️⃣ Install PlatformIO
       - name: Install PlatformIO
         run: |
+          pip install --upgrade pip
           pip install platformio
 
-      # 4️⃣ Install AWS CLI (IMPORTANT)
-      - name: Install AWS CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y awscli
+      # 4️⃣ Configure AWS credentials (AWS CLI included)
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
 
       # 5️⃣ Read & validate firmware version
       - name: Read firmware version
@@ -51,7 +54,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "📦 Firmware version: $VERSION"
 
-      # 6️⃣ Build firmware
+      # 6️⃣ Build ESP32 firmware
       - name: Build ESP32 firmware
         run: |
           pio run
@@ -69,34 +72,38 @@ jobs:
           cp .pio/build/esp32dev/firmware.bin out/firmware.bin
           cp version.txt out/version.txt
 
-          echo '{
+          cat <<EOF > out/metadata.json
+          {
             "device": "esp32dev",
             "version": "${{ steps.fw_version.outputs.version }}",
             "build_type": "production",
             "git_commit": "${{ github.sha }}",
             "build_by": "github-actions",
-            "build_time": "'$(date -u)'",
+            "build_time": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "firmware_file": "firmware.bin"
-          }' > out/metadata.json
+          }
+          EOF
 
-      # 8️⃣ Upload to S3 (releases)
+      # 8️⃣ Upload firmware to S3 (versioned release)
       - name: Upload to S3 (releases)
         run: |
-          aws s3 cp out/firmware.bin s3://${{ secrets.S3_BUCKET }}/esp32s3/releases/v${{ steps.fw_version.outputs.version }}/firmware.bin
-          aws s3 cp out/version.txt s3://${{ secrets.S3_BUCKET }}/esp32s3/releases/v${{ steps.fw_version.outputs.version }}/version.txt
-          aws s3 cp out/metadata.json s3://${{ secrets.S3_BUCKET }}/esp32s3/releases/v${{ steps.fw_version.outputs.version }}/metadata.json
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ap-south-1
+          aws s3 cp out/firmware.bin \
+            s3://${{ secrets.S3_BUCKET }}/esp32s3/releases/v${{ steps.fw_version.outputs.version }}/firmware.bin
+
+          aws s3 cp out/version.txt \
+            s3://${{ secrets.S3_BUCKET }}/esp32s3/releases/v${{ steps.fw_version.outputs.version }}/version.txt
+
+          aws s3 cp out/metadata.json \
+            s3://${{ secrets.S3_BUCKET }}/esp32s3/releases/v${{ steps.fw_version.outputs.version }}/metadata.json
 
       # 9️⃣ Promote firmware to production
       - name: Promote firmware to production
         run: |
-          aws s3 cp out/firmware.bin s3://${{ secrets.S3_BUCKET }}/esp32s3/production/firmware.bin
-          aws s3 cp out/version.txt s3://${{ secrets.S3_BUCKET }}/esp32s3/production/version.txt
-          aws s3 cp out/metadata.json s3://${{ secrets.S3_BUCKET }}/esp32s3/production/metadata.json
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ap-south-1
+          aws s3 cp out/firmware.bin \
+            s3://${{ secrets.S3_BUCKET }}/esp32s3/production/firmware.bin
+
+          aws s3 cp out/version.txt \
+            s3://${{ secrets.S3_BUCKET }}/esp32s3/production/version.txt
+
+          aws s3 cp out/metadata.json \
+            s3://${{ secrets.S3_BUCKET }}/esp32s3/production/metadata.json
