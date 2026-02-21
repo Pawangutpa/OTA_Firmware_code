@@ -7,6 +7,6 @@ String getEfuseMacString() {
     sprintf(macStr, "%04X%08X",
             (uint16_t)(chipid >> 32),
             (uint32_t)chipid);
-
+    
     return String(macStr);
 }

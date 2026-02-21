@@ -9,6 +9,7 @@ PubSubClient mqtt(espClient);
 
 String baseTopic;
 
+
 void mqttCallback(char* topic, byte* payload, unsigned int len) {
   String msg;
   for (int i = 0; i < len; i++) msg += (char)payload[i];
@@ -39,6 +40,7 @@ String normalizeMac(String mac) {
 
 void mqttInit() {
   baseTopic = "devices/" + getEfuseMacString();
+  Serial.println("Device MAC: " + baseTopic);
   mqtt.setServer(MQTT_BROKER, MQTT_PORT);
   mqtt.setCallback(mqttCallback);
 }
