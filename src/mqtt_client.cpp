@@ -14,8 +14,16 @@ void mqttCallback(char* topic, byte* payload, unsigned int len) {
   for (int i = 0; i < len; i++) msg += (char)payload[i];
 
   if (String(topic).endsWith("/command")) {
-    if (msg == "LED_ON") digitalWrite(LED_PIN, HIGH);
-    if (msg == "LED_OFF") digitalWrite(LED_PIN, LOW);
+    if (msg == "LED_ON") {
+  deviceState.ledState = true;
+  digitalWrite(LED_PIN, HIGH);
+}
+
+if (msg == "LED_OFF") {
+  deviceState.ledState = false;
+  digitalWrite(LED_PIN, LOW);
+}
+
   }
 
   if (String(topic).endsWith("/ota")) {
@@ -37,20 +45,28 @@ void mqttInit() {
 
 
 void mqttReconnect() {
-  while (!mqtt.connected()) {
-    if (mqtt.connect(WiFi.macAddress().c_str(), MQTT_USER, MQTT_PASS)) {
-      mqtt.subscribe((baseTopic + "/command").c_str());
-      mqtt.subscribe((baseTopic + "/ota").c_str());
-    } else {
-      delay(2000);
-    }
+  static unsigned long lastAttempt = 0;
+
+  if (millis() - lastAttempt < 3000) return;
+
+  lastAttempt = millis();
+
+  String clientId = normalizeMac(WiFi.macAddress());
+
+  if (mqtt.connect(clientId.c_str(), MQTT_USER, MQTT_PASS)) {
+    mqtt.subscribe((baseTopic + "/command").c_str());
+    mqtt.subscribe((baseTopic + "/ota").c_str());
   }
 }
 
+
 void mqttLoop() {
-  if (!mqtt.connected()) mqttReconnect();
+  if (!mqtt.connected()) {
+    mqttReconnect();
+  }
   mqtt.loop();
 }
+
 
 void mqttPublishStatus() {
   mqtt.publish((baseTopic + "/status").c_str(),

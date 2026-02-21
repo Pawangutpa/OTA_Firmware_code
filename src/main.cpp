@@ -34,8 +34,8 @@ void loop() {
     mqttPublishHealth();
     lastHealth = millis();
   }
-  digitalWrite(200, HIGH);
+  digitalWrite(2, HIGH);
   delay(200);
-  digitalWrite(200, LOW);
+  digitalWrite(2, LOW);
   delay(1000);
 }

@@ -11,6 +11,7 @@ void handleOtaCommand(String payload) {
   WiFiClient client;
 
   Serial.println("⬇️ OTA started");
+  
   http.begin(client, payload);
 
   int httpCode = http.GET();
