@@ -3,7 +3,7 @@
 #include "device_state.h"
 #include "ota_manager.h"
 #include <WiFi.h>
-
+#include "device_identity.h"
 WiFiClient espClient;
 PubSubClient mqtt(espClient);
 
@@ -38,7 +38,7 @@ String normalizeMac(String mac) {
 
 
 void mqttInit() {
-  baseTopic = "devices/" + normalizeMac(WiFi.macAddress());
+  baseTopic = "devices/" + getEfuseMacString();
   mqtt.setServer(MQTT_BROKER, MQTT_PORT);
   mqtt.setCallback(mqttCallback);
 }
@@ -48,12 +48,15 @@ void mqttReconnect() {
   static unsigned long lastAttempt = 0;
 
   if (millis() - lastAttempt < 3000) return;
-
   lastAttempt = millis();
 
-  String clientId = normalizeMac(WiFi.macAddress());
+  String efuseMac = getEfuseMacString();
 
-  if (mqtt.connect(clientId.c_str(), MQTT_USER, MQTT_PASS)) {
+  String clientId = "esp32_" + efuseMac;
+  String mqttUser = "esp32_" + efuseMac;
+  String mqttPass = efuseMac;
+
+  if (mqtt.connect(clientId.c_str(), mqttUser.c_str(), mqttPass.c_str())) {
     mqtt.subscribe((baseTopic + "/command").c_str());
     mqtt.subscribe((baseTopic + "/ota").c_str());
   }

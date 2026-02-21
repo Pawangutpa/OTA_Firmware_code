@@ -7,8 +7,8 @@
 // ================= MQTT =================
 #define MQTT_BROKER     "13.234.112.107"
 #define MQTT_PORT       1883
-#define MQTT_USER       "esp32_0C5D32DD2568"
-#define MQTT_PASS       "0C5D32DD2568"
+#define MQTT_USER       ""
+#define MQTT_PASS       ""
 
 // ================= DEVICE =================
 #define DEVICE_TYPE     "esp32s3"
