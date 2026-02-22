@@ -35,7 +35,7 @@ void loop() {
     lastHealth = millis();
   }
   digitalWrite(2, HIGH);
-  delay(200);
+  delay(50);
   digitalWrite(2, LOW);
   delay(1000);
 }
