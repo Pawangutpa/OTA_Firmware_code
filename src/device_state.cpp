@@ -2,5 +2,5 @@
 
 DeviceState deviceState = {
   .ledState = false,
-  .firmwareVersion = FW_VERSION
+  .firmwareVersion = "1.3.0",
 };
