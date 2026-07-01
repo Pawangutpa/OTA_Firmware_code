@@ -21,6 +21,7 @@ void setup() {
   unsigned long wifiStart = millis();
   while (WiFi.status() != WL_CONNECTED && millis() - wifiStart < 20000) {
     delay(500);
+    delay(500);
   }
 
   mqttInit();

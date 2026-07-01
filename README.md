@@ -1,4 +1,4 @@
-# ESP32 IoT Firmware
+# ESP32 IoT Firmware  with ota
 
 Industry-grade ESP32 firmware with:
 - MQTT communication

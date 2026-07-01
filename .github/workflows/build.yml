@@ -54,27 +54,30 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "📦 Firmware version: $VERSION"
 
-      # 6️⃣ Build ESP32 firmware
+      # 6️⃣ Build ESP32 firmware (pin the S3 env so a stale/wrong platformio.ini
+      #     fails clearly instead of building a wrong-chip binary)
       - name: Build ESP32 firmware
         run: |
-          pio run
+          pio run -e esp32s3
 
       # 7️⃣ Prepare OTA artifacts
       - name: Prepare OTA artifacts
         run: |
           mkdir -p out
 
-          if [ ! -f .pio/build/esp32dev/firmware.bin ]; then
-            echo "❌ firmware.bin not found"
+          if [ ! -f .pio/build/esp32s3/firmware.bin ]; then
+            echo "❌ firmware.bin not found at .pio/build/esp32s3/"
+            echo "What actually got built:"
+            find .pio/build -name firmware.bin || true
             exit 1
           fi
 
-          cp .pio/build/esp32dev/firmware.bin out/firmware.bin
+          cp .pio/build/esp32s3/firmware.bin out/firmware.bin
           cp version.txt out/version.txt
 
           cat <<EOF > out/metadata.json
           {
-            "device": "esp32dev",
+            "device": "esp32s3",
             "version": "${{ steps.fw_version.outputs.version }}",
             "build_type": "production",
             "git_commit": "${{ github.sha }}",
