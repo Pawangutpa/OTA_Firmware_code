@@ -21,7 +21,7 @@ void setup() {
   unsigned long wifiStart = millis();
   while (WiFi.status() != WL_CONNECTED && millis() - wifiStart < 20000) {
     delay(500);
-    delay(500);
+    Serial.print
   }
 
   mqttInit();
@@ -45,7 +45,7 @@ void loop() {
   }
   Serial.println("Blinking LED on pin 2 version 1.0.0");
   digitalWrite(2, HIGH);
-  delay(500);
+  delay(100);
   digitalWrite(2, LOW);
   delay(200);
 }
