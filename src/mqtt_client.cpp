@@ -61,6 +61,9 @@ void mqttInit() {
   baseTopic = "devices/" + getDeviceMac();
   Serial.println("Device MAC: " + baseTopic);
   mqtt.setServer(MQTT_BROKER, MQTT_PORT);
+  // OTA signed URLs are ~400+ bytes; PubSubClient's default 256-byte buffer
+  // silently drops packets that large, so the /ota message never arrives.
+  mqtt.setBufferSize(1024);
   mqtt.setCallback(mqttCallback);
 }
 
