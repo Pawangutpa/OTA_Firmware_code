@@ -8,7 +8,7 @@
 // Must be the SAME broker the backend/frontend use (15.206.91.29).
 // Device uses native MQTT on 1883; backend uses WebSocket on 9001 of the
 // same Mosquitto broker. Ensure EC2 security group allows inbound 1883.
-#define MQTT_BROKER     "15.206.91.29"
+#define MQTT_BROKER     "14.206.91.29"
 #define MQTT_PORT       1883
 // The device does NOT use a fixed user/pass. It authenticates per-device with
 // credentials derived from its eFuse MAC (user "esp32_<MAC>", pass "<MAC>") -
