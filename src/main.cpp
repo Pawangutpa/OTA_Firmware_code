@@ -45,7 +45,7 @@ void loop() {
   }
   Serial.println("Blinking LED on pin 2 version " FW_VERSION);
   digitalWrite(2, HIGH);
-  delay(500);
+  delay(100);
   digitalWrite(2, LOW);
-  delay(500);
+  delay(100);
 }
